@@ -1,0 +1,10 @@
+[00] drive 02, unit 00, id F7
+[01] drive 00, unit 00, id FE
+[02] drive 01, unit 01, id FE
+[03] drive 02, unit 00, id F7
+[04] drive 03, unit 00, id F7
+[05] drive 00, unit 00, id 00
+[06] drive 00, unit 00, id 00
+[07] drive 00, unit 00, id 00
+[08] drive 00, unit 00, id 00
+[09] drive 00, unit 00, id 00
