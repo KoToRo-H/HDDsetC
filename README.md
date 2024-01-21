@@ -16,4 +16,4 @@ HDDをCドライブにすることだけが目的です。
 ・GCCの場合 : gcc -ldos HDDsetC.c<br>
 
 ■参考<br>
-readDPB.x：DPB(ドライブパラメータブロック)を読み込んで表示するだけのプログラムです。
+readDPB.x：DPB（Drive Parameter Block）を読み込んで表示するだけの習作プログラムです。
