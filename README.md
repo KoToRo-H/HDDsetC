@@ -12,8 +12,8 @@ PC-9801と併用しているとHDDドライブを間違えるからです。
 ＊順番に前後のドライブ番号を入れ替えていくだけのプログラムなので賢い方式では無いです。<br>
 
 ■コンパイル方法<br>
-・XCの場合 : XC /Y HDDsetC.c<br>
-・GCCの場合 : GCC -ldos HDDsetC.c<br>
+・XCの場合 : cc /Y HDDsetC.c<br>
+・GCCの場合 : gcc -ldos HDDsetC.c<br>
 
 ■参考<br>
 readDPB.x：DPBを読み込んで表示するだけのプログラムです。DOSコールの習作ソフトです。
