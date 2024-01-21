@@ -11,5 +11,5 @@ PC-9801と併用しているとHDDドライブを間違えるからです。
 ＊順番に前後のドライブ番号を入れ替えていくだけのプログラムなので賢い方式じゃ無いです。<br>
 
 コンパイル方法<br>
-　XC /Y HDDsetC.c<br>
-　GCC -ldos HDDsetC.c<br>
+・XCの場合 :  XC /Y HDDsetC.c<br>
+・GCCの場合:  GCC -ldos HDDsetC.c<br>
