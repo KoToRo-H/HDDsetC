@@ -1,6 +1,7 @@
 /*
 	HDDsetC.c	HDDをCドライブにFDDをA/Bドライブに移動する
-	XCコンパイル： cc /Y HDDsetC.c
+	XCコンパイル ： cc /Y HDDsetC.c
+	GCCコンパイル： gcc -ldos HDDsetC.c
 */
 
 #include <stdio.h>
@@ -8,8 +9,11 @@
 #include <doslib.h>
 
 #define DPB_MAX 26 /* A_drive～Z_drive */
+#define FLG_SET (1) /* フラグ状態：カレントドライブ */
+#define FLG_CLR (0) /* フラグ状態：カレントではない */
 
-struct DPBPTR dpb[DPB_MAX]; /* DPBリスト */
+struct DPBPTR dpb[DPB_MAX];  /* DPBリスト */
+int    curdrv_flag[DPB_MAX]; /* カレントドライブ記憶フラグ */
 
 /* メディアバイト id */
 enum DRIVE_ID {
@@ -31,6 +35,46 @@ void search_dpb()
 	}
 }
 
+/* カレントドライブを検索してフラグに登録 */
+void store_curdrv()
+{
+	int drive; /* カレントドライブ番号 */
+	int i;
+
+	drive = CURDRV(); /* カレントドライブ番号を取得 */
+	for (i = 0; i < DPB_MAX; i++) {
+		/* 全てのフラグをクリア */
+		curdrv_flag[i] = FLG_CLR;
+	}
+	/* カレントドライブ番号のフラグだけをセット */
+	curdrv_flag[drive] = FLG_SET;
+}
+
+/* カレントドライブフラグを交換 */
+void swap_flag(int drv_No)
+{
+	int flag_tmp;
+
+	/* drv_Noのドライブと(drv_No-1)のドライブのフラグを入れ換える */
+	flag_tmp = curdrv_flag[drv_No];
+	curdrv_flag[drv_No] = curdrv_flag[drv_No - 1];
+	curdrv_flag[drv_No - 1] = flag_tmp;
+}
+
+/* カレントドライブを入れ換え後のドライブにする */
+void restore_curdrv()
+{
+	int i;
+	for (i = 0; i < DPB_MAX; i++) {
+		if (curdrv_flag[i] == FLG_SET) {
+			/* 移動後のカレントドライブ番号を検出した */
+			CHGDRV(i);
+			/* 以降の検索は不要なので処理を中断 */
+			break;
+		}
+	}
+}
+
 /* ドライブ入れ替え：先頭から検索してunit_NoのFDを見つけたら終了 */
 void rearrange_drive_order(int unit_No)
 {
@@ -46,6 +90,7 @@ void rearrange_drive_order(int unit_No)
 		if (dpb[1].id == FD && dpb[1].unit == unit_No) {
 			/* FD1がAドライブに割り当たっていた場合だけBドライブと交換 */
 			DRVXCHG(1, 2);
+			swap_flag(2-1);
 		}
 	}
 
@@ -55,8 +100,9 @@ void rearrange_drive_order(int unit_No)
 		}
 		else {
 			/* FDより前に他のドライブが存在する */
-			for (j = i; j > fd_No; j--) {
-				DRVXCHG(j, j-1); /* 前のドライブと交換 */
+			for (j = i; j > fd_No; j--) { /* 該当ドライブから前方向へ */
+				DRVXCHG(j, j-1); /* 前のドライブと交換 0:curdrv, 1:DriveA*/
+				swap_flag(j-1);  /* 0:DriveA, 1:DriveB */
 			}
 			return; /* fd_Noまで入れ替え完了 */
 		}
@@ -67,6 +113,9 @@ void main()
 {
 	printf("HDDsetC : HDDをCドライブにFDDをA/Bドライブに移動\n");
 
+	/* ドライブ入れ換え前のカレントドライブを記憶 */
+	store_curdrv();
+
 	/* FD0をAドライブに移動 */
 	search_dpb(); /* DPBを取得 */
 	rearrange_drive_order(0);
@@ -75,8 +124,8 @@ void main()
 	search_dpb(); /* DPBを再取得 */
 	rearrange_drive_order(1);
 
-	/* カレントドライブをCドライブに移す */
-	CHGDRV(2);
+	/* カレントドライブを移動後のドライブに移す */
+	restore_curdrv();
 
 	exit(0);
 }
